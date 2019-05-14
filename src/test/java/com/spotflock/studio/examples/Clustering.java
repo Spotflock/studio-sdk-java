@@ -1,5 +1,6 @@
-package com.spotflock.studio;
+package com.spotflock.studio.examples;
 
+import com.spotflock.studio.StudioClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +12,6 @@ public class Clustering {
     public static void main(String[] args) {
 
         StudioClient c = new StudioClient("xxx");
-        String r = "";
         String clusterData = "";
         String testData = "";
         JSONObject response = null;
@@ -19,8 +19,7 @@ public class Clustering {
 
         try {
 
-            r = c.store("csv/airoplane_data.csv");
-            response = new JSONObject(r);
+            response = c.store("csv/airoplane_data.csv");
             clusterData = response.get("fileUrl").toString();
             System.out.println(clusterData);
 
@@ -28,19 +27,17 @@ public class Clustering {
             JSONArray features = new JSONArray();
             features.put("Activity Period");
             features.put("Operating Airline");
-            String clusterResponse = c.cluster("clustering", "KMeansClustering", clusterData, features, new JSONObject());
-            System.out.println(clusterResponse);
+            response = c.cluster("clustering", "KMeansClustering", clusterData, features, new JSONObject());
+            System.out.println(response.toString());
 
-            response = new JSONObject(clusterResponse);
             jobId = (Integer) ((JSONObject) response.get("data")).get("jobId");
 
-            String jobStatusResponse = c.jobStatus(jobId);
-            System.out.println(jobStatusResponse);
+            response = c.jobStatus(jobId);
+            System.out.println(response.toString());
 
-            String jobOutputResponse = c.jobOutput(jobId);
-            System.out.println(jobOutputResponse);
+            response = c.jobOutput(jobId);
+            System.out.println(response.toString());
 
-            response = new JSONObject(jobOutputResponse);
             String predFileUrl = (String) ((JSONObject) response.get("output")).get("clusterFileUrl");
             String predictions = c.download(predFileUrl);
             System.out.println(predictions);

@@ -1,5 +1,6 @@
-package com.spotflock.studio;
+package com.spotflock.studio.examples;
 
+import com.spotflock.studio.StudioClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,7 +11,6 @@ public class Regression {
     public static void main(String[] args) {
 
         StudioClient c = new StudioClient("xxx");
-        String r = "";
         String trainData = "";
         String testData = "";
         JSONObject response = null;
@@ -18,13 +18,11 @@ public class Regression {
 
         try {
 
-            r = c.store("csv/housing_train.csv");
-            response = new JSONObject(r);
+            response = c.store("csv/housing_train.csv");
             trainData = response.get("fileUrl").toString();
             System.out.println(trainData);
 
-            r = c.store("csv/housing_test.csv");
-            response = new JSONObject(r);
+            response = c.store("csv/housing_test.csv");
             testData = response.get("fileUrl").toString();
             System.out.println(testData);
 
@@ -32,32 +30,30 @@ public class Regression {
             JSONArray features = new JSONArray();
             features.put("LotShape");
             features.put("Street");
-            String trainResponse = c.train("regression", "LinearRegression", trainData, "SalePrice", features, new JSONObject());
-            System.out.println(trainResponse);
+            response = c.train("regression", "LinearRegression", trainData, "SalePrice", features, new JSONObject());
+            System.out.println(response.toString());
 
-            response = new JSONObject(trainResponse);
             jobId = (Integer) ((JSONObject) response.get("data")).get("jobId");
 
-            String jobStatusResponse = c.jobStatus(jobId);
-            System.out.println(jobStatusResponse);
+            response = c.jobStatus(jobId);
+            System.out.println(response.toString());
 
-            String jobOutputResponse = c.jobOutput(jobId);
-            System.out.println(jobOutputResponse);
 
-            response = new JSONObject(jobOutputResponse);
+            response = c.jobOutput(jobId);
+            System.out.println(response.toString());
+
             String modelUrl = (String) ((JSONObject) response.get("output")).get("modelUrl");
-            String predictResponse = c.predict("regression", testData, modelUrl, new JSONObject());
+            response = c.predict("regression", testData, modelUrl, new JSONObject());
+            System.out.println(response.toString());
 
-            response = new JSONObject(predictResponse);
             jobId = (Integer) ((JSONObject) response.get("data")).get("jobId");
 
-            String predictResponseStatus = c.jobStatus(jobId);
-            System.out.println(predictResponseStatus);
+            response = c.jobStatus(jobId);
+            System.out.println(response.toString());
 
-            String predictionOutputResponse = c.jobOutput(jobId);
-            System.out.println(predictionOutputResponse);
+            response = c.jobOutput(jobId);
+            System.out.println(response.toString());
 
-            response = new JSONObject(predictionOutputResponse);
             String predFileUrl = (String) ((JSONObject) response.get("output")).get("predFileUrl");
             String predictions = c.download(predFileUrl);
             System.out.println(predictions);

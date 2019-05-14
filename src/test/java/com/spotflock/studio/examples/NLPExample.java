@@ -1,6 +1,7 @@
-package com.spotflock.studio;
+package com.spotflock.studio.examples;
 
-import org.json.JSONException;
+import com.spotflock.studio.StudioClient;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -8,7 +9,7 @@ public class NLPExample {
     public static void main(String[] args) {
 
         StudioClient c = new StudioClient("xxx");
-        String r = null;
+        JSONObject r = null;
         try {
             r = c.sentimentAnalysis("I am feeling sick.");
             System.out.print(r);
@@ -17,8 +18,6 @@ public class NLPExample {
 
 
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
             e.printStackTrace();
         }
 

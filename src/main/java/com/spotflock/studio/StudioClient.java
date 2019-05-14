@@ -16,13 +16,31 @@ public class StudioClient {
     String baseUrl = null;
     String apiKey = null;
 
+    /**
+     * This is Spotflock Studio Java SDK Client for v1.3.0.
+     *         For more information, visit https://studio.spotflock.com/documentation/
+     *
+     *
+     * @param apiKey API Key Generated for an app in Spotflock Studio.
+     */
+
     public StudioClient(String apiKey) {
 
         this.apiKey = apiKey;
         this.baseUrl = "https://studio.spotflock.com/api/v1";
     }
 
-    public String sentimentAnalysis(String text) throws IOException, JSONException {
+    /**
+     *  The function to call sentiment analysis service in Phoenix Language.
+     *             For more information, visit https://studio.spotflock.com/docs/ai/phoenix-language/
+     *
+     * @param text The text on which sentiment analysis is to be applied.
+     * @return A json object containing sentiment analysis response.
+     * @throws IOException
+     * @throws JSONException
+     */
+
+    public JSONObject sentimentAnalysis(String text) throws IOException, JSONException {
 
         String url = baseUrl + "/language-service/phoenix-language/nlp/sentiment";
         HashMap<String, String> headers = new HashMap<>();
@@ -31,11 +49,21 @@ public class StudioClient {
         headers.put("Content-Type", "application/json");
         JSONObject body = new JSONObject();
         body.put("text", text);
-        return sendPost(url, headers, body);
+        return new JSONObject(sendPost(url, headers, body));
 
     }
 
-    public String posTagger(String text) throws IOException, JSONException {
+    /**
+     * The function to call pos tagger service in Phoenix Language.
+     *             For more information, visit https://studio.spotflock.com/docs/ai/phoenix-language/
+     *
+     * @param text The text on which POS analysis is to be applied.
+     * @return A json obj containing POS tagger response.
+     * @throws IOException
+     * @throws JSONException
+     */
+
+    public JSONObject posTagger(String text) throws IOException, JSONException {
         String url = baseUrl + "/language-service/phoenix-language/nlp/pos";
         HashMap<String, String> headers = new HashMap<>();
         headers.put("ApiKey", this.apiKey);
@@ -43,8 +71,17 @@ public class StudioClient {
         headers.put("Content-Type", "application/json");
         JSONObject body = new JSONObject();
         body.put("text", text);
-        return sendPost(url, headers, body);
+        return  new JSONObject(sendPost(url, headers, body));
     }
+
+    /**
+     * The function to call face detection service in Phoenix Vision.
+     *             For more information, visit https://studio.spotflock.com/docs/ai/phoenix-vision/
+     *
+     * @param filePath The path of the image file.
+     * @return A base64 decoded image with face detected.
+     * @throws IOException
+     */
 
     public String faceDetection(String filePath) throws IOException {
         String response = "";
@@ -60,7 +97,16 @@ public class StudioClient {
         return response;
     }
 
-    public String faceDetectionJson(String filePath) throws IOException {
+    /**
+     * The function to call face detection service in Phoenix Vision.
+     *             For more information, visit https://studio.spotflock.com/docs/ai/phoenix-vision/
+     *
+     * @param filePath The path of the image file.
+     * @return  A list(JSONArray) of co-ordinates for all faces detected in the image.
+     * @throws IOException
+     */
+
+    public JSONArray faceDetectionJson(String filePath) throws IOException {
 
         String response = "";
         String charset = "UTF-8";
@@ -71,8 +117,17 @@ public class StudioClient {
         MultipartUtility multipart = new MultipartUtility(requestURL, charset, headersMap);
         multipart.addFilePart("file", new File(filePath));
         response = multipart.finish();
-        return response;
+        return  new JSONArray(response);
     }
+
+    /**
+     *The function to call license-plate detection service in Phoenix Vision.
+     *             For more information, visit https://studio.spotflock.com/docs/ai/phoenix-vision/
+     *
+     * @param filePath The path of the image file.
+     * @return A base64 decoded image with face detected.
+     * @throws IOException
+     */
 
     public String licensePlateDetection(String filePath) throws IOException {
         String response = "";
@@ -85,10 +140,17 @@ public class StudioClient {
         multipart.addFilePart("file", new File(filePath));
         response = multipart.finish();
 
-        return response;
+        return  response;
     }
 
-    public String licensePlateDetectionJson(String filePath) throws IOException {
+    /**
+     * The function to call license-plate detection service in Phoenix Vision.
+     *             For more information, visit https://studio.spotflock.com/docs/ai/phoenix-vision/
+     * @param filePath The path of the image file.
+     * @return A list(JSONArray) of co-ordinates all license plates detected in the image.
+     * @throws IOException
+     */
+    public JSONArray licensePlateDetectionJson(String filePath) throws IOException {
         String response = "";
         String charset = "UTF-8";
         String requestURL = this.baseUrl + "/vision-service/phoenix-vision/license-plate/json";
@@ -98,25 +160,46 @@ public class StudioClient {
         MultipartUtility multipart = new MultipartUtility(requestURL, charset, headersMap);
         multipart.addFilePart("file", new File(filePath));
         response = multipart.finish();
-        return response;
+        return  new JSONArray(response);
     }
 
-    public String train(String service, String algorithm, String datasetUrl, String label, JSONArray features, JSONObject params) throws IOException, JSONException {
-        String response = "";
+    /**
+     *  The function call to train service in Phoenix ML.
+     *             For more information, visit https://studio.spotflock.com/docs/ai/phoenix-ml/"> Spotflock Studio </a>
+     *
+     * @param service Valid parameter values are classification, regression.
+     * @param algorithm algorithm by which model will be trained.
+     * @param datasetUrl dataset file location in spotflock storage.
+     * @param label label of the column in dataset file.
+     * @param features column name list which is used to train classification model.
+     * @param params JSON object containing additional parameters like lib, modelName, saveModel, trainPercentage.
+     *               each of the parameter have default values as mentioned below.
+     *               <ul>
+     *                 <li>lib: valid values for this params are weka, spotflock, H2O, scikit (default: weka)</li>
+     *                 <li>modelName: name by which model will be saved. (default: Algorithm Name will be used.)</li>
+     *                 <li>saveModel: boolean param indicating saving the model in cloud storage. (default: true)</li>
+     *                 <li>trainPercentage: % dataset splitting for training and testing. (default: 80%)</li>
+     *               </ul>
+     *
+     * @return Json object containing the training job details.
+     * @throws IOException
+     * @throws JSONException
+     */
 
-        if(!params.has("modelName"))
+    public JSONObject train(String service, String algorithm, String datasetUrl, String label, JSONArray features, JSONObject params) throws IOException, JSONException {
+
+        if (!params.has("modelName"))
             params.put("modelName", algorithm);
-        if(!params.has("trainPercentage"))
+        if (!params.has("trainPercentage"))
             params.put("trainPercentage", 80);
-        if(!params.has("saveModel"))
+        if (!params.has("saveModel"))
             params.put("saveModel", true);
-        if(!params.has("lib"))
+        if (!params.has("lib"))
             params.put("lib", "weka");
 
         String url = baseUrl + "/ml-service/phoenix-ml/" + service + "/train";
         HashMap<String, String> headers = new HashMap<>();
         headers.put("ApiKey", this.apiKey);
-//        headers.put("User-Agent", USER_AGENT);
         headers.put("Content-Type", "application/json");
         JSONObject body = new JSONObject();
         body.put("library", params.remove("lib"));
@@ -131,28 +214,48 @@ public class StudioClient {
         config.put("saveModel", params.remove("saveModel"));
         config.put("params", params);
         body.put("config", config);
-        return sendPost(url, headers, body);
+        return  new JSONObject(sendPost(url, headers, body));
 
     }
 
-    public String cluster(String service, String algorithm, String datasetUrl, JSONArray features, JSONObject params) throws IOException, JSONException {
-        String response = "";
+    /**
+     *  The function call to cluster service in Phoenix ML.
+     *             For more information, visit https://studio.spotflock.com/docs/ai/phoenix-ml/
+     *
+     * @param service Valid parameter values are CLUSTER.
+     * @param algorithm algorithm by which model will be trained.
+     * @param datasetUrl dataset file location in spotflock storage.
+     * @param features column name list which is used for clustering.
+     * @param params JSON object containing additional parameters like lib, modelName, saveModel, numOfClusters.
+     *                     each of the parameter have default values as mentioned below.
+     *                     <ul>
+     *                       <li>lib: valid values for this params are weka, spotflock, H2O, scikit (default: weka)</li>
+     *                       <li>modelName: name by which model will be saved. (default: Algorithm Name will be used.)</li>
+     *                       <li>saveModel: boolean param indicating saving the model in cloud storage. (default: true)</li>
+     *                       <li>numOfClusters: number of cluster, (default: 2)</li>
+     *                     </ul>
+     *
+     * @return A json obj containing model info.
+     * @throws IOException
+     * @throws JSONException
+     */
+
+    public JSONObject cluster(String service, String algorithm, String datasetUrl, JSONArray features, JSONObject params) throws IOException, JSONException {
 
 
-        if(!params.has("modelName"))
+        if (!params.has("modelName"))
             params.put("modelName", algorithm);
-        if(!params.has("numOfClusters"))
+        if (!params.has("numOfClusters"))
             params.put("numOfClusters", 2);
-        if(!params.has("saveModel"))
+        if (!params.has("saveModel"))
             params.put("saveModel", true);
-        if(!params.has("lib"))
+        if (!params.has("lib"))
             params.put("lib", "weka");
 
 
         String url = baseUrl + "/ml-service/phoenix-ml/cluster";
         HashMap<String, String> headers = new HashMap<>();
         headers.put("ApiKey", this.apiKey);
-//        headers.put("User-Agent", USER_AGENT);
         headers.put("Content-Type", "application/json");
         JSONObject body = new JSONObject();
         body.put("library", params.remove("lib"));
@@ -168,22 +271,47 @@ public class StudioClient {
         config.put("saveModel", params.remove("saveModel"));
         config.put("params", params);
         body.put("config", config);
-        return sendPost(url, headers, body);
+        return  new JSONObject(sendPost(url, headers, body));
 
     }
 
 
-    public String feedback(String service, String algorithm, String datasetUrl, String feedbackDatasetUrl, int jobId, String modelUrl, String label, JSONArray features, JSONObject params) throws IOException, JSONException
-    {
+    /**
+     *   The function call to feedback service in Phoenix ML.
+     *
+     * @param service Trained model's service.
+     * @param algorithm Trained model's algorithm.
+     * @param datasetUrl Trained model's dataset url.
+     * @param feedbackDatasetUrl feedback_data:
+     *                 a)Dataset (used for feedback) file location in spotflock storage.
+     *                 b)Feedback dataset upload. IMP: Please ensure the dataset has all features used for training the model.
+     * @param jobId Job_id from training API response.
+     * @param modelUrl Model file location in spotflock storage.
+     * @param label Trained model's label.
+     * @param features Trained model's features.
+     * @param params JSON object containing additional parameters like lib, modelName, saveModel, trainPercentage.
+     *                     each of the parameter have default values as mentioned below.
+     *                     <ul>
+     *                      <li>lib: valid values for this params are weka, spotflock, H2O, scikit (default: weka)</li>
+     *                       <li>modelName: name by which model will be saved. (default: Algorithm Name will be used.)</li>
+     *                       <li>saveModel: boolean param indicating saving the model in cloud storage. (default: true)</li>
+     *                       <li>trainPercentage: % dataset splitting for training and testing. (default: 80%)</li>
+     *                     </ul>
+     * @return A json obj containing feedback model info.
+     * @throws IOException
+     * @throws JSONException
+     */
+
+    public JSONObject feedback(String service, String algorithm, String datasetUrl, String feedbackDatasetUrl, int jobId, String modelUrl, String label, JSONArray features, JSONObject params) throws IOException, JSONException {
         String response = "";
 
-        if(!params.has("modelName"))
+        if (!params.has("modelName"))
             params.put("modelName", algorithm);
-        if(!params.has("trainPercentage"))
+        if (!params.has("trainPercentage"))
             params.put("trainPercentage", 80);
-        if(!params.has("saveModel"))
+        if (!params.has("saveModel"))
             params.put("saveModel", true);
-        if(!params.has("lib"))
+        if (!params.has("lib"))
             params.put("lib", "weka");
 
         String url = baseUrl + "/ml-service/phoenix-ml/" + service + "/feedback";
@@ -208,12 +336,31 @@ public class StudioClient {
         config.put("saveModel", params.remove("saveModel"));
         config.put("params", params);
         body.put("config", config);
-        return sendPost(url, headers, body);
+        return  new JSONObject(sendPost(url, headers, body));
 
     }
 
+    /**
+     *
+     * The function call to predict service in Phoenix ML.
+     *             For more information, visit https://studio.spotflock.com/docs/ai/phoenix-ml/
+     *
+     * @param service Valid parameter values are classification, regression.
+     * @param datasetUrl dataset file location in spotflock storage.
+     * @param modelUrl trained model location in spotflock storage.
+     * @param params JSON object containing additional parameters like lib, modelName, saveModel, trainPercentage.
+     *                           each of the parameter have default values as mentioned below.
+     *                           <ul>
+     *                            <li>lib: valid values for this params are weka, spotflock, H2O, scikit (default: weka)</li>
+     *                             </ul>
+     * @return  A json obj containing the file info which has the predictions.
+     * @throws IOException
+     */
 
-    public String predict(String service, String datasetUrl, String modelUrl, JSONObject params) throws IOException {
+    public JSONObject predict(String service, String datasetUrl, String modelUrl, JSONObject params) throws IOException {
+
+        if (!params.has("lib"))
+            params.put("lib", "weka");
 
         String url = this.baseUrl + "/ml-service/phoenix-ml/" + service + "/predict";
         HashMap<String, String> headers = new HashMap<>();
@@ -227,11 +374,21 @@ public class StudioClient {
         config.put("datasetUrl", datasetUrl);
         config.put("modelUrl", modelUrl);
         body.put("config", config);
-        return sendPost(url, headers, body);
+        return  new JSONObject(sendPost(url, headers, body));
 
     }
 
-    public String store(String filePath) throws IOException {
+
+    /**
+     * The function call to store in Phoenix ML.
+     *              For more information, visit https://studio.spotflock.com/docs/ai/phoenix-ml/
+     *
+     * @param filePath The path of the dataset file.
+     * @return A json obj containing the file path in storage.
+     * @throws IOException
+     */
+
+    public JSONObject store(String filePath) throws IOException {
         String response = "";
         String requestURL = this.baseUrl + "/solution-service/cloud-solution/storage";
         String charset = "UTF-8";
@@ -241,10 +398,20 @@ public class StudioClient {
         MultipartUtility multipart = new MultipartUtility(requestURL, charset, headersMap);
         multipart.addFilePart("file", new File(filePath));
         response = multipart.finish();
-        return response;
+        return  new JSONObject(response);
     }
 
-    public String jobStatus(Integer jobId) throws IOException, InterruptedException {
+    /**
+     * The function call to get the job status in Phoenix ML.
+     *             For more information, visit https://studio.spotflock.com/docs/ai/phoenix-ml/
+     *
+     * @param jobId jobId from the train api response.
+     * @return A json obj containing the status details.
+     * @throws IOException
+     * @throws InterruptedException
+     */
+
+    public JSONObject jobStatus(Integer jobId) throws IOException, InterruptedException {
 
         String url = this.baseUrl + "/ml-service/phoenix-ml/job/status?id=" + jobId;
         HashMap<String, String> headersMap = new HashMap<>();
@@ -262,19 +429,37 @@ public class StudioClient {
             state = (String) resJson.get("state");
             Thread.sleep(5000);
         }
-        return res;
+        return  new JSONObject(res);
 
     }
 
-    public String jobOutput(Integer jobId) throws IOException {
+    /**
+     *   The function call to get the job output in Phoenix ML.
+     *                 For more information, visit https://studio.spotflock.com/docs/ai/phoenix-ml/
+     *
+     * @param jobId jobId from the train api response.
+     * @return  A json obj containing the job output details.
+     * @throws IOException
+     */
+
+    public JSONObject jobOutput(Integer jobId) throws IOException {
 
         String url = this.baseUrl + "/ml-service/phoenix-ml/output/findBy?jobId=" + jobId;
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put("ApiKey", this.apiKey);
         headersMap.put("User-Agent", USER_AGENT);
-        return sendGet(url, headersMap);
+        return new JSONObject(sendGet(url, headersMap));
 
     }
+
+    /**
+     *  The function call to download the prediction file in Phoenix ML.
+     *                 For more information, visit https://studio.spotflock.com/docs/ai/phoenix-ml/
+     *
+     * @param fileUrl location url of file stored in cloud storage.
+     * @return file content in simple text format.
+     * @throws IOException
+     */
 
     public String download(String fileUrl) throws IOException {
 
@@ -285,7 +470,6 @@ public class StudioClient {
         return sendGet(url, headersMap);
 
     }
-
 
     private String sendPost(String urlStr, HashMap<String, String> headersMap, JSONObject bodyJson) throws IOException, JSONException {
 
